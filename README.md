@@ -17,6 +17,17 @@ pip install --upgrade pip
 pip install --upgrade pwntools
 ```
 
+## Install
+
+git clone it down and import it
+
+```
+git clone https://github.com/OAlienO/FMT.git
+cp FMT/FMT.py your_path/
+```
+
+currently not on PYPI
+
 ## Example
 
 ```python
