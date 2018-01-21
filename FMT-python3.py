@@ -25,7 +25,7 @@ class FMT:
 
     def _write(self, address, value):
         # set one byte at a time ( 0x00000000000000?? to 0x??00000000000000 )
-        for i in xrange(8):
+        for i in range(8):
             value_now = (value >> (8 * i)) & 0xff
             value_append = (value_now - self.printed + 0x100) % 0x100
             self.printed = value_now
@@ -48,10 +48,10 @@ class FMT:
             distance = distance_new
 
         # generate payload
-        payload = ""
-        for i, fmt in enumerate(self.fmt): payload += fmt.format(offset + distance + i)
-        payload += "\x00" * (8 - len(payload) % 8)
-        payload += "".join(map(p64, self.address))
+        payload = b""
+        for i, fmt in enumerate(self.fmt): payload += fmt.format(offset + distance + i).encode('ascii')
+        payload += b"\x00" * (8 - len(payload) % 8)
+        payload += b''.join(map(p64, self.address))
         
         # reset
         self.printed = 0
