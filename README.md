@@ -2,20 +2,11 @@
 
 help you create **format string payload**
 
-currently just for **amd64**
+currently just for **amd64** (because for 32-bit you can use [pwntools - fmtstr](http://docs.pwntools.com/en/stable/fmtstr.html))
 
-put address data after the format string to **avoid '\x00' cut of the string**
+put address data after the format string to **avoid '\x00' cut of the string** (which pwntools fail to handle)
 
-## Prerequisite
-
-### [pwntools](https://github.com/Gallopsled/pwntools)
-
-```bash
-apt-get update
-apt-get install python2.7 python-pip python-dev git libssl-dev libffi-dev build-essential
-pip install --upgrade pip
-pip install --upgrade pwntools
-```
+no dependency
 
 ## Install
 
