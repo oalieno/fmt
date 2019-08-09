@@ -19,7 +19,7 @@ pip install git+https://github.com/OAlienO/fmt.git
 ```python
 from fmt import FMT
 
-f = fmt()
-f[0x601018] = 0x400747 # write address 0x601018 with data 0x400747
-payload = f.payload(offset = 6, printed = 8)
+F = FMT()
+F[0x601018] = 0x400747 # write address 0x601018 with data 0x400747
+payload = F.payload(offset = 6, printed = 8)
 ```
