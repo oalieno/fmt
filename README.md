@@ -1,4 +1,4 @@
-# FMT
+# fmt
 
 help you create **format string payload**
 
@@ -10,21 +10,16 @@ no dependency
 
 ## Install
 
-git clone it down and import it
-
 ```
-git clone https://github.com/OAlienO/FMT.git
-cp FMT/FMT.py your_path/
+pip install git+https://github.com/OAlienO/fmt.git
 ```
-
-currently not on PYPI
 
 ## Example
 
 ```python
-from FMT import FMT
+from fmt import fmt
 
-F = FMT()
-F[0x601018] = 0x400747 # write address 0x601018 with data 0x400747
-payload = F.payload(offset = 6, printed = 8)
+f = fmt()
+f[0x601018] = 0x400747 # write address 0x601018 with data 0x400747
+payload = f.payload(offset = 6, printed = 8)
 ```
