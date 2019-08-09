@@ -2,16 +2,18 @@ import math
 import struct
 
 class FMT:
-    hhn = "%{}c%{}$hhn"
-    hn  = "%{}c%{}$hn"
-    n   = "%{}c%{}$n"
-    lln = "%{}c%{}$lln"
-
-    def __init__(self):
+    def __init__(self, arch = 'amd64'):
+        self.arch = arch
         self.buffer = []
         self.address = []
         self.fmt = []
         self.printed = 0
+        self.nformat = {
+            1: "%{}c%{}$hhn",
+            2: "%{}c%{}$hn",
+            4: "%{}c%{}$n",
+            8: "%{}c%{}$lln"
+        }
 
     def p64(self, data, fmt = "<Q"):
         return struct.pack(fmt, data)
@@ -25,22 +27,25 @@ class FMT:
         for i, fmt in enumerate(self.fmt): width += len(fmt.format(offset + distance + i))
         return width
 
-    def _write(self, address, value):
+    def _write(self, address, value, size = 1):
+        length = { 'amd64': 8, 'x86': 4 }[self.arch]
         # set one byte at a time ( 0x00000000000000?? to 0x??00000000000000 )
-        for i in range(8):
-            value_now = (value >> (8 * i)) & 0xff
-            value_append = (value_now - self.printed + 0x100) % 0x100
+        for i in range(length // size):
+            # (value >> 0) & 0xff
+            value_now = (value >> (8 * size * i)) & ((1 << (8 * size)) - 1)
+            # (value_now - self.printed + 0x100) % 0x100
+            value_append = (value_now - self.printed + (1 << (8 * size))) % (1 << (8 * size))
             self.printed = value_now
             # can't write %0c, but we can write %256c
-            if value_append == 0: value_append = 256
-            self._append(address + i, self.hhn.format(value_append, "{}"))
+            if value_append == 0: value_append = (1 << (8 * size))
+            self._append(address + i, self.nformat[size].format(value_append, "{}"))
 
     def __setitem__(self, address, value):
         self.buffer.append((address, value))
 
-    def payload(self, offset, printed = 0):
+    def payload(self, offset, printed = 0, size = 1):
         self.printed = printed
-        for address, value in self.buffer: self._write(address, value)
+        for address, value in self.buffer: self._write(address, value, size)
         # calculate how far the distance between fmt and address is
         distance = 0
         while True:

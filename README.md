@@ -17,7 +17,7 @@ pip install git+https://github.com/OAlienO/fmt.git
 ## Example
 
 ```python
-from fmt import fmt
+from fmt import FMT
 
 f = fmt()
 f[0x601018] = 0x400747 # write address 0x601018 with data 0x400747
