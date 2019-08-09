@@ -38,7 +38,7 @@ class FMT:
             self.printed = value_now
             # can't write %0c, but we can write %256c
             if value_append == 0: value_append = (1 << (8 * size))
-            self._append(address + i, self.nformat[size].format(value_append, "{}"))
+            self._append(address + i * size, self.nformat[size].format(value_append, "{}"))
 
     def __setitem__(self, address, value):
         self.buffer.append((address, value))
